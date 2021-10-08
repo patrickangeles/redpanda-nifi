@@ -1,0 +1,28 @@
+---
+version: '3.7'
+services:
+  redpanda:
+    image: docker.vectorized.io/vectorized/redpanda:v21.9.3
+    command:
+      - redpanda start
+      - --smp 1
+      - --memory 512M
+      - --reserve-memory 0M
+      - --overprovisioned
+      - --node-id 0
+      - --set redpanda.auto_create_topics_enabled=true
+      - --kafka-addr PLAINTEXT://0.0.0.0:9094,OUTSIDE://0.0.0.0:9092
+      - --advertise-kafka-addr PLAINTEXT://redpanda:9094,OUTSIDE://localhost:9092
+    ports:
+      - "9092:9092"
+      - "9094:9094"
+      - "9644:9644"
+    volumes:
+      - /var/lib/redpanda/data
+  nifi:
+    image: apache/nifi:latest
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - NIFI_WEB_HTTP_PORT=8080
